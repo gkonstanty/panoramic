@@ -35,6 +35,8 @@ import org.opencv.imgproc.Imgproc;
 import java.io.File;
 import java.io.IOException;
 
+// Odpalenie maszyny wirtualnej:
+// emulator -use-system-libs -avd 4.7_WXGA_API_22_-_widzenie_maszynowe
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
