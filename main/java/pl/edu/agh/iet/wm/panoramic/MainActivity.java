@@ -200,13 +200,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public int pxToDp(int px) {
+    private int pxToDp(int px) {
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         int dp = Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
         return dp;
     }
 
-    private void onClickStitch(View view) {
+    public void onClickStitch(View view) {
 
         String image1Path = getPath(this, imageURIs[0]);
         String image2Path = getPath(this, imageURIs[1]);
