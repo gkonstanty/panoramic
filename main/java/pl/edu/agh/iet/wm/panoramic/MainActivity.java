@@ -178,12 +178,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             Log.d(TAG, "end");
-//
-//            ImageView imageView = (ImageView) findViewById(R.id.imageView);
-//
-//            imageView.setImageBitmap(grayBitmap);
-//
-
 
             if (this.clickedButtonId == R.id.button_image1) {
                 imageURIs[0] = selectedImageUri;
@@ -213,8 +207,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onClickStitch(View view) {
-//        Bitmap stitchedBitmap = stitchImages(firstImagePath, secondImagePath);
-//        imageView
+
+        String image1Path = getPath(this, imageURIs[0]);
+        String image2Path = getPath(this, imageURIs[1]);
+
+        Bitmap stitchedBitmap = stitchImages(image1Path, image2Path);
+
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+
+        imageView.setImageBitmap(stitchedBitmap);
+
     }
 
     private Bitmap stitchImages(String imagePath1, String imagePath2) {
