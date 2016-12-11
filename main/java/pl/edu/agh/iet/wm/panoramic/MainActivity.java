@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
 
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
 
-        imageView.setImageBitmap(stitchedBitmap);
+        imageView.setImageBitmap(Bitmap.createScaledBitmap(stitchedBitmap, 600, 300, false));
 
     }
 
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Mat secondImageGray = new Mat(secondImage.height(), secondImage.width(), CvType.CV_8U, new Scalar(4));
-        if (secondImage.empty()) {
+        if (secondImageGray.empty()) {
             Log.d(TAG, "Something is wrong with the second image.");
         } else {
             Imgproc.cvtColor(secondImage, secondImageGray, Imgproc.COLOR_RGBA2GRAY, 4);
@@ -261,7 +261,6 @@ public class MainActivity extends AppCompatActivity {
         Mat descriptors1 = new Mat();
         Mat descriptors2 = new Mat();
 
-
         //structure for the matches
         MatOfDMatch matches = new MatOfDMatch();
 
@@ -272,20 +271,11 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "keypoints1: " + keypoints1.size());
         Log.d(TAG, "keypoints2: " + keypoints2.size());
 
-
-        if (firstImageGray.empty()) {
-            Log.d(TAG, "gray empty");
-        } else {
-            Log.d(TAG, "ok");
-        }
         Log.d(TAG, "test7");
+
         //getting the descriptors from the keypoints
         fe.compute(firstImageGray, keypoints1, descriptors1);
-//        fe.compute(firstImage, keypoints1, descriptors1);
-
-        Log.d(TAG, "test7a");
         fe.compute(secondImageGray, keypoints2, descriptors2);
-
 
         Log.d(TAG, "test8");
         //getting the matches the 2 sets of descriptors
@@ -294,9 +284,8 @@ public class MainActivity extends AppCompatActivity {
         //turn the matches to a list
         List<DMatch> matchesList = matches.toList();
 
-
         Double maxDist = 0.0; //keep track of max distance from the matches
-        Double minDist = 100.0; //keep track of min distance from the matches
+        Double minDist = 10000.0; //keep track of min distance from the matches
 
         //calculate max & min distances between keypoints
         for (int i = 0; i < keypoints1.rows(); i++) {
@@ -310,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //structure for the good matches
-        LinkedList<DMatch> goodMatches = new LinkedList<DMatch>();
+        LinkedList<DMatch> goodMatches = new LinkedList<>();
 
         //use only the good matches (i.e. whose distance is less than 3*min_dist)
         for (int i = 0; i < descriptors1.rows(); i++) {
@@ -321,8 +310,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         //structures to hold points of the good matches (coordinates)
-        LinkedList<Point> objList = new LinkedList<Point>(); // image1
-        LinkedList<Point> sceneList = new LinkedList<Point>(); //image 2
+        LinkedList<Point> objList = new LinkedList<>(); // image1
+        LinkedList<Point> sceneList = new LinkedList<>(); //image 2
 
         List<KeyPoint> keypoints_objectList = keypoints1.toList();
         List<KeyPoint> keypoints_sceneList = keypoints2.toList();
@@ -350,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //TODO: sprawdzić poprawność:
-        Mat H = Calib3d.findHomography(obj, scene, Calib3d.RANSAC, 0.5);
+        Mat H = Calib3d.findHomography(obj, scene);
 
 
         //LinkedList<Point> cornerList = new LinkedList<Point>();
@@ -368,17 +357,19 @@ public class MainActivity extends AppCompatActivity {
         Mat result = new Mat();
 
         //size of the new image - i.e. image 1 + image 2
-        Size s = new Size(firstImageGray.cols() + secondImage.cols(), firstImageGray.rows());
+        Size s = new Size(firstImage.cols() + secondImage.cols(), firstImage.rows());
 
         //using the homography matrix to warp the two images
-        Imgproc.warpPerspective(firstImageGray, result, H, s);
+        Imgproc.warpPerspective(firstImage, result, H, s);
         int i = firstImageGray.cols();
         Mat m = new Mat(result, new Rect(i, 0, secondImageGray.cols(), secondImageGray.rows()));
 
         secondImageGray.copyTo(m);
 
         Mat img_mat = new Mat();
-        Features2d.drawMatches(firstImageGray, keypoints1, secondImageGray, keypoints2, gm, img_mat, new Scalar(254, 0, 0), new Scalar(254, 0, 0), new MatOfByte(), 2);
+        img_mat = m;
+//        Features2d.drawMatches(firstImageGray, keypoints1, secondImageGray, keypoints2, gm, img_mat, new Scalar(254, 0, 0), new Scalar(254, 0, 0), new MatOfByte(), 2);
+
 
 
         try {
