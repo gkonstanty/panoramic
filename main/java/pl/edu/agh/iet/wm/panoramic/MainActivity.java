@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.opencv.calib3d.Calib3d.RANSAC;
+
 // Odpalenie maszyny wirtualnej:
 // emulator -use-system-libs -avd 4.7_WXGA_API_22_-_widzenie_maszynowe
 public class MainActivity extends AppCompatActivity {
@@ -243,10 +245,11 @@ public class MainActivity extends AppCompatActivity {
 //        int minHessian = 400;
 //        SurfFeatureDetector detector( minHessian );
 //
-        FeatureDetector fd = FeatureDetector.create(FeatureDetector.BRISK);
-        DescriptorExtractor fe = DescriptorExtractor.create(DescriptorExtractor.SURF);
-//        DescriptorExtractor fe = DescriptorExtractor.create(DescriptorExtractor.SIFT);
+//        FeatureDetector fd = FeatureDetector.create(FeatureDetector.BRISK);
+//        DescriptorExtractor fe = DescriptorExtractor.create(DescriptorExtractor.SURF);
 
+        FeatureDetector fd = FeatureDetector.create(FeatureDetector.ORB);
+        DescriptorExtractor fe = DescriptorExtractor.create(DescriptorExtractor.ORB);
         DescriptorMatcher fm = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE);
 
 
@@ -277,8 +280,8 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.d(TAG, "test7");
         //getting the descriptors from the keypoints
-//        fe.compute(firstImageGray, keypoints1, descriptors1);
-        fe.compute(firstImage, keypoints1, descriptors1);
+        fe.compute(firstImageGray, keypoints1, descriptors1);
+//        fe.compute(firstImage, keypoints1, descriptors1);
 
         Log.d(TAG, "test7a");
         fe.compute(secondImageGray, keypoints2, descriptors2);
@@ -330,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
             sceneList.addLast(keypoints_sceneList.get(goodMatches.get(i).trainIdx).pt);
         }
 
-        System.out.println("\nNum. of good matches" + goodMatches.size());
+        System.out.println("\nNum. of good matches " + goodMatches.size());
 
         MatOfDMatch gm = new MatOfDMatch();
         gm.fromList(goodMatches);
@@ -347,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //TODO: sprawdzić poprawność:
-        Mat H = Calib3d.findHomography(obj, scene);
+        Mat H = Calib3d.findHomography(obj, scene, Calib3d.RANSAC, 0.5);
 
 
         //LinkedList<Point> cornerList = new LinkedList<Point>();
