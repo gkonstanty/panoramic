@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,10 +16,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import org.opencv.android.OpenCVLoader;
@@ -34,6 +37,10 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static android.R.attr.bitmap;
 
 // Odpalenie maszyny wirtualnej:
 // emulator -use-system-libs -avd 4.7_WXGA_API_22_-_widzenie_maszynowe
@@ -42,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
 
     private int PICK_IMAGE_REQUEST=1;
+    private int clickedButtonId;
+    private Uri[] imageURIs = new Uri[2];
+
 
     static{
         if (!OpenCVLoader.initDebug()){
@@ -57,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -77,30 +88,29 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        Mat test_img = Highgui.imread(Environment.getExternalStorageDirectory()
-                + "/Pictures/ooopraga.png", 0);
+//        Mat test_img = Highgui.imread(Environment.getExternalStorageDirectory()
+//                + "/Pictures/ooopraga.png", 0);
+//
+//        if (test_img.empty()){
+//            Log.d(TAG, "meh, nie znalazlo");
+//
+//        } else{
+//
+//            // convert to bitmap:
+//            Bitmap bm = Bitmap.createBitmap(test_img.cols(), test_img.rows(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(test_img, bm);
+//
+//            // find the imageview and draw it!
+//            ImageView image_viewer = (ImageView) findViewById(R.id.imageView);
+//            image_viewer.setImageBitmap(bm);
+//        }
 
-        if (test_img.empty()){
-            Log.d(TAG, "meh, nie znalazlo");
 
-        } else{
-
-            // convert to bitmap:
-            Bitmap bm = Bitmap.createBitmap(test_img.cols(), test_img.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(test_img, bm);
-
-            // find the imageview and draw it!
-            ImageView image_viewer = (ImageView) findViewById(R.id.imageView);
-            image_viewer.setImageBitmap(bm);
-        }
-
-
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        // Always show the chooser (if there are multiple options available)
-         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-
+//        Intent intent = new Intent();
+//        intent.setType("image/*");
+//        intent.setAction(Intent.ACTION_GET_CONTENT);
+//        // Always show the chooser (if there are multiple options available)
+//         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
 
     }
 
@@ -128,54 +138,91 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+    public void selectImage(View view) {
+
+        this.clickedButtonId = view.getId();
+
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.putExtra("buttonName","helloButton");
+        // Always show the chooser (if there are multiple options available)
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-                // Wyciagniecie scierzki z obrazka galerii (druga odpowiedz)
-                // http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework
+            // Wyciagniecie scierzki z obrazka galerii (druga odpowiedz)
+            // http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework
 
-                Uri selectedImageUri = data.getData();
-                String selectedImagePath = getPath(this, selectedImageUri);
-                Log.d(TAG, "Uri2 (lib): " + selectedImagePath);
+            Uri selectedImageUri = data.getData();
+            String selectedImagePath = getPath(this, selectedImageUri);
+            Log.d(TAG, "Uri2 (lib): " + selectedImagePath);
 
-                // Typ 4 (kanaly) wczytywanego obrazka
-                Mat selectedImage = Highgui.imread(selectedImagePath, 4);
+            // Typ 4 (kanaly) wczytywanego obrazka
+            Mat selectedImage = Highgui.imread(selectedImagePath, 4);
 
-                Mat destinationMatrix = new Mat (selectedImage.height(), selectedImage.width(), CvType.CV_8U, new Scalar(4));
+            Mat destinationMatrix = new Mat (selectedImage.height(), selectedImage.width(), CvType.CV_8U, new Scalar(4));
 
-                Log.d(TAG, "Img height: " + selectedImage.height() + ", width: " + selectedImage.width());
-                Bitmap grayBitmap = null;
+            Log.d(TAG, "Img height: " + selectedImage.height() + ", width: " + selectedImage.width());
+            Bitmap grayBitmap = null;
 
-                if (selectedImage.empty()){
-                    Log.d(TAG, "meh, test2Img nie znalazlo");
+            if (selectedImage.empty()){
+                Log.d(TAG, "meh, test2Img nie znalazlo");
 
-                } else{
-                    Log.d(TAG, "wow, test2Img znalazlo sie");
+            } else{
+                Log.d(TAG, "wow, test2Img znalazlo sie");
 
-                    // Zamiana na Gray:
-                    Imgproc.cvtColor( selectedImage, destinationMatrix, Imgproc.COLOR_RGBA2GRAY, 4 );
+                // Zamiana na Gray:
+                Imgproc.cvtColor( selectedImage, destinationMatrix, Imgproc.COLOR_RGBA2GRAY, 4 );
 
-                    try {
-                        grayBitmap = Bitmap.createBitmap(destinationMatrix.cols(), destinationMatrix.rows(), Bitmap.Config.ARGB_8888);
-                        Utils.matToBitmap(destinationMatrix, grayBitmap);
-                    }
-                    catch (CvException e){Log.d("Exception",e.getMessage());}
+                try {
+                    grayBitmap = Bitmap.createBitmap(destinationMatrix.cols(), destinationMatrix.rows(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(destinationMatrix, grayBitmap);
                 }
+                catch (CvException e){Log.d("Exception",e.getMessage());}
+            }
 
-                Log.d(TAG, "end");
+            Log.d(TAG, "end");
+//
+//            ImageView imageView = (ImageView) findViewById(R.id.imageView);
+//
+//            imageView.setImageBitmap(grayBitmap);
+//
 
 
+            if(this.clickedButtonId == R.id.button_image1) {
+                imageURIs[0] = selectedImageUri;
+            } else {
+                imageURIs[1] = selectedImageUri;
 
-                ImageView imageView = (ImageView) findViewById(R.id.imageView);
+            }
+            
+            // set image as background of clicked button
+            Button clickedButton = (Button) findViewById(this.clickedButtonId);
+            int buttonHeight = pxToDp(clickedButton.getHeight());
+            int buttonWidth = pxToDp(clickedButton.getWidth());
 
-                imageView.setImageBitmap(grayBitmap);
+            BitmapDrawable bdrawable = new BitmapDrawable(getResources(),
+                    Bitmap.createScaledBitmap(grayBitmap, buttonWidth, buttonHeight, false));
+
+            clickedButton.setBackground(bdrawable);
+            clickedButton.setText(R.string.change_image);
 
         }
     }
 
+    public int pxToDp(int px) {
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int dp = Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return dp;
+    }
 
     // END
     // Poniżej kod z biblioteki do znajdowanie scierzki z obrazka w galerii
@@ -298,4 +345,5 @@ public class MainActivity extends AppCompatActivity {
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
+
 }

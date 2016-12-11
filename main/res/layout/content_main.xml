@@ -13,17 +13,62 @@
     tools:context="pl.edu.agh.iet.wm.panoramic.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/ic_launcher"
-        android:id="@+id/imageView"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="183dp" />
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:stretchColumns="*">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:minHeight="200dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
+
+            <Button
+                android:text="@string/add_image"
+                android:id="@+id/button_image1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:onClick="selectImage"
+                android:textStyle="normal|bold"
+                android:layout_margin="5dp" />
+
+            <Button
+                android:text="@string/add_image"
+                android:id="@+id/button_image2"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:onClick="selectImage"
+                android:textStyle="normal|bold"
+                android:layout_margin="5dp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:stretchColumns="*">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_span="2"
+                android:gravity="center_vertical|center_horizontal|center"
+                >
+
+                <Button
+                    android:text="@string/stich"
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/button3"
+                    android:background="@mipmap/stich_image"
+                    android:textSize="0sp" />
+            </RelativeLayout>
+
+        </TableRow>
+    </TableLayout>
+
+
 </RelativeLayout>

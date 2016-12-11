@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Panoramic</string>
     <string name="action_settings">Settings</string>
+    <string name="add_image">Add image</string>
+    <string name="test_image_desc">Test image</string>
+    <string name="stich">Stich</string>
+    <string name="change_image">Change image</string>
 </resources>
